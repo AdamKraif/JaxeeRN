@@ -99,7 +99,7 @@ class MainMap extends Component {
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421
             };
-            console.log("position", pos);
+            // console.log("position", position);
             this.setState({ locationResult: pos });
         });
     }
