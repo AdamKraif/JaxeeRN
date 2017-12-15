@@ -187,17 +187,9 @@ class MainMap extends Component {
         const duration = 200;
 
         if (this.shoiuldGoToTop) {
-            if (this.newPosition < (layoutHeight * 0.2)) {
-                this.shoiuldGoToTop = true;
-            } else {
-                this.shoiuldGoToTop = false;
-            }
+            this.shoiuldGoToTop = this.newPosition < (layoutHeight * 0.2);
         } else {
-            if (this.newPosition < (layoutHeight * 0.6)) {
-                this.shoiuldGoToTop = true;
-            } else {
-                this.shoiuldGoToTop = false;
-            }
+            this.shoiuldGoToTop = this.newPosition < (layoutHeight * 0.6);
         }
 
         // console.log("this.shoiuldGoToTop", this.shoiuldGoToTop);
