@@ -24,8 +24,14 @@ class MainMap extends Component {
             layoutHeight: 0,
             spContainerTranslateY: [],
             spContainerScaleX: [],
-            spContainerOpacity: []
-        }
+            spContainerOpacity: [],
+            locationResult: {
+                latitude: 37.78825,
+                longitude: -122.4324,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+            }
+        };
 
         this.spContainerScaleXValue = [];
     }
@@ -41,7 +47,8 @@ class MainMap extends Component {
                     return false
                 },
                 onMoveShouldSetPanResponder: (event, gestureState) => {
-                    return gestureState.dy < - 10
+                    // console.log("this one", gestureState.dy, (Math.abs(gestureState.dy)) > 10);
+                    return (Math.abs(gestureState.dy)) > 10;
                 },
                 onMoveShouldSetPanResponderCapture: (event, gestureState) => {
                     return false;
@@ -83,14 +90,44 @@ class MainMap extends Component {
         });
     }
 
+    componentDidMount() {
+        // this.getLocationAsync();
+        navigator.geolocation.getCurrentPosition((position) => {
+            let pos = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421
+            };
+            console.log("position", pos);
+            this.setState({ locationResult: pos });
+        });
+    }
+
+
+    // getLocationAsync = async () => {
+    //     let { status } = await Permissions.askAsync(Permissions.LOCATION);
+    //     if (status !== 'granted') {
+    //         this.setState({
+    //             locationResult: 'Permission to access location was denied',
+    //         });
+    //     }
+    //
+    //     let location = await Location.getCurrentPositionAsync({});
+    //     this.setState({ locationResult: JSON.stringify(location) });
+    // };
+
+
+
 
     onStart(e, g, index) {
         this.setState({scrollEnabled: false});
-        // this.scrollViewRef.scrollTo({
-        //     x: width * index,
-        //     y: 0,
-        //     animation: true
-        // })
+        this.scrollViewRef.scrollTo({
+            x: width * index,
+            y: 0,
+            animation: false
+        });
+        // this.shouldChangeScroll = true;
     }
 
     onMove(e, g, index) {
@@ -99,10 +136,24 @@ class MainMap extends Component {
         const {locationY} = e.nativeEvent;
 
         const {spContainerTranslateY, spContainerScaleX, layoutHeight, spContainerOpacity} = this.state;
+        if (this.shoiuldGoToTop) {
+            this.newPosition = dy;
+        } else {
+            this.newPosition = (layoutHeight - FIRST_LEVEL_HEIGHT) + dy;
+        }
 
-        const newPosition = (layoutHeight - FIRST_LEVEL_HEIGHT) + dy;
 
-        const present = (1 - (newPosition / layoutHeight));
+        // if (this.shouldChangeScroll) {
+        //     this.scrollViewRef.scrollTo({
+        //         x: width * index,
+        //         y: 0,
+        //         animation: false
+        //     });
+        //     this.shouldChangeScroll = false;
+        // }
+
+        const present = (1 - (this.newPosition / layoutHeight));
+
 
         let opacityArrayAnim = [];
         spContainerOpacity.map((item, i) => {
@@ -118,7 +169,7 @@ class MainMap extends Component {
             ...opacityArrayAnim,
             Animated.timing(spContainerTranslateY[index], {
                 duration: 0,
-                toValue: newPosition < 0 ? 0 : newPosition,
+                toValue: this.newPosition < 0 ? 0 : this.newPosition,
                 useNativeDriver: true
             }),
             Animated.timing(spContainerScaleX[index], {
@@ -134,6 +185,23 @@ class MainMap extends Component {
 
         const {spContainerTranslateY, layoutHeight, spContainerScaleX, spContainerOpacity} = this.state;
         const duration = 200;
+
+        if (this.shoiuldGoToTop) {
+            if (this.newPosition < (layoutHeight * 0.2)) {
+                this.shoiuldGoToTop = true;
+            } else {
+                this.shoiuldGoToTop = false;
+            }
+        } else {
+            if (this.newPosition < (layoutHeight * 0.6)) {
+                this.shoiuldGoToTop = true;
+            } else {
+                this.shoiuldGoToTop = false;
+            }
+        }
+
+        // console.log("this.shoiuldGoToTop", this.shoiuldGoToTop);
+
         let opacityArrayAnim = [];
         spContainerOpacity.map((item, i) => {
             opacityArrayAnim.push(Animated.timing(item, {
@@ -147,17 +215,21 @@ class MainMap extends Component {
             ...opacityArrayAnim,
             Animated.timing(spContainerTranslateY[index], {
                 duration,
-                toValue: (layoutHeight - FIRST_LEVEL_HEIGHT),
+                toValue: this.shoiuldGoToTop ? 0 : (layoutHeight - FIRST_LEVEL_HEIGHT),
                 useNativeDriver: true,
                 easing: Easing.out(Easing.cubic)
             }),
             Animated.timing(spContainerScaleX[index], {
                 duration,
-                toValue: 0,
+                toValue: this.shoiuldGoToTop ? 1 : 0,
                 useNativeDriver: true
             })]).start(() => {
         });
-        this.setState({scrollEnabled: true});
+        if (this.shoiuldGoToTop) {
+            this.setState({scrollEnabled: false});
+        } else {
+            this.setState({scrollEnabled: true});
+        }
     }
 
     _renderSp = () => {
@@ -207,12 +279,7 @@ class MainMap extends Component {
                   style={{flex: 1}}>
                 <MapView
                     style={{width, height}}
-                    initialRegion={{
-                        latitude: 37.78825,
-                        longitude: -122.4324,
-                        latitudeDelta: 0.0922,
-                        longitudeDelta: 0.0421,
-                    }}
+                    initialRegion={this.state.locationResult}
                 />
 
                 <ScrollView ref={(ref) => {
