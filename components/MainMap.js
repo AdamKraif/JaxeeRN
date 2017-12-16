@@ -13,7 +13,6 @@ import Swiper from 'react-native-swiper';
 
 const {height, width} = Dimensions.get('window');
 const FIRST_LEVEL_HEIGHT = 80;
-const SwiperAnim = Animated.createAnimatedComponent(Swiper);
 
 class MainMap extends Component {
 
