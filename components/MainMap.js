@@ -9,9 +9,11 @@ import {
     Easing
 } from 'react-native';
 import MapView from 'react-native-maps';
+import Swiper from 'react-native-swiper';
 
 const {height, width} = Dimensions.get('window');
 const FIRST_LEVEL_HEIGHT = 80;
+const SwiperAnim = Animated.createAnimatedComponent(Swiper);
 
 class MainMap extends Component {
 
@@ -23,7 +25,7 @@ class MainMap extends Component {
             scrollEnabled: true,
             layoutHeight: 0,
             spContainerTranslateY: new Animated.Value(height),
-            spContainerScaleX: [],
+            spContainerScaleX: new Animated.Value(0),
             spContainerOpacity: [],
             test: false
         };
@@ -34,7 +36,11 @@ class MainMap extends Component {
             latitudeDelta: 0.0922,
             longitudeDelta: 0.0421,
         };
-        this.spContainerScaleXValue = [];
+
+        this.spContainerScaleXValue = this.state.spContainerScaleX.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.9, 1]
+        });
     }
 
     componentWillMount() {
@@ -67,24 +73,14 @@ class MainMap extends Component {
             })
         }
 
-        let animatedScaleX = [];
         let animatedOpacity = [];
         for (let i = 0; this.state.items.length > i; i++) {
-            animatedScaleX.push(new Animated.Value(0.9));
             animatedOpacity.push(new Animated.Value(1))
 
         }
 
         this.setState({
-            spContainerScaleX: animatedScaleX,
             spContainerOpacity: animatedOpacity
-        }, () => {
-            for (let i = 0; this.state.items.length > i; i++) {
-                this.spContainerScaleXValue.push(animatedScaleX[i].interpolate({
-                    inputRange: [0, 0.9, 1],
-                    outputRange: [0.9, 0.9, 1]
-                }));
-            }
         });
     }
 
@@ -168,7 +164,7 @@ class MainMap extends Component {
                 toValue: this.newPosition < 0 ? 0 : this.newPosition,
                 useNativeDriver: true
             }),
-            Animated.timing(spContainerScaleX[index], {
+            Animated.timing(spContainerScaleX, {
                 duration: 0,
                 toValue: present > 1 ? 1 : present,
                 useNativeDriver: true
@@ -207,7 +203,7 @@ class MainMap extends Component {
                 useNativeDriver: true,
                 easing: Easing.out(Easing.cubic)
             }),
-            Animated.timing(spContainerScaleX[index], {
+            Animated.timing(spContainerScaleX, {
                 duration,
                 toValue: this.shoiuldGoToTop ? 1 : 0,
                 useNativeDriver: true
@@ -227,7 +223,7 @@ class MainMap extends Component {
             return (<Animated.View key={index} {...this._panResponder(index).panHandlers}
                                    style={{
                                        transform: [
-                                           {scale: this.spContainerScaleXValue.length > 0 ? this.spContainerScaleXValue[index] : 0},
+                                           {scale: this.spContainerScaleXValue},
                                        ],
                                        opacity: spContainerOpacity[index],
                                        width: width,
@@ -249,12 +245,12 @@ class MainMap extends Component {
                     this.setState({layoutHeight: height}, () => {
 
                         let animationParalel = [];
-                            animationParalel.push(Animated.timing(this.state.spContainerTranslateY, {
-                                duration: 100,
-                                toValue: height - FIRST_LEVEL_HEIGHT,
-                                easing: Easing.out(Easing.cubic),
-                                useNativeDriver: true
-                            }))
+                        animationParalel.push(Animated.timing(this.state.spContainerTranslateY, {
+                            duration: 100,
+                            toValue: height - FIRST_LEVEL_HEIGHT,
+                            easing: Easing.out(Easing.cubic),
+                            useNativeDriver: true
+                        }))
 
 
                         Animated.parallel(animationParalel).start();
@@ -267,24 +263,36 @@ class MainMap extends Component {
                     style={{width, height}}
                     initialRegion={this.locationResult}
                 />
+                <Animated.View style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0,top:0,
+                    transform: [
+                        {translateY: this.state.spContainerTranslateY},
+                    ]
+                }}>
+                <Swiper
+                    showsPagination={false}
+                    showsButtons={false}>
+                    {this._renderSp()}
+                </Swiper>
+                </Animated.View>
 
-                <Animated.ScrollView  onMomentumScrollBegin={(event) => {
-                    console.log(event.nativeEvent);
-                }} pointerEvents={this.state.test ? "none" : "auto"} ref={(ref) => {
-                    this.scrollViewRef = ref;
-                }} scrollEnabled={this.state.scrollEnabled} horizontal showsHorizontalScrollIndicator={false}
-                            style={{position: 'absolute', bottom: 0, left: 0, right: 0,
 
-                                transform: [
-                                    {translateY: this.state.spContainerTranslateY},
-                                ],
+                {/*<Animated.ScrollView */}
+                {/* pointerEvents={this.state.test ? "none" : "auto"} ref={(ref) => {*/}
+                {/*this.scrollViewRef = ref;*/}
+                {/*}} scrollEnabled={this.state.scrollEnabled} horizontal showsHorizontalScrollIndicator={false}*/}
+                {/*style={{position: 'absolute', bottom: 0, left: 0, right: 0,*/}
+
+                {/*transform: [*/}
+                {/*{translateY: this.state.spContainerTranslateY},*/}
+                {/*],*/}
 
 
-                            }}>
-                    <View style={{flexDirection: 'row'}}>
-                        {this._renderSp()}
-                    </View>
-                </Animated.ScrollView>
+                {/*}}>*/}
+                {/*<View style={{flexDirection: 'row'}}>*/}
+                {/*{this._renderSp()}*/}
+                {/*</View>*/}
+                {/*</Animated.ScrollView>*/}
             </View>
         );
     }
