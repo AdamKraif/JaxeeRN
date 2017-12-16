@@ -22,17 +22,18 @@ class MainMap extends Component {
             items: [{name: 'אני עובד'}, {name: 'אני עובד'}],
             scrollEnabled: true,
             layoutHeight: 0,
-            spContainerTranslateY: [],
+            spContainerTranslateY: new Animated.Value(height),
             spContainerScaleX: [],
             spContainerOpacity: [],
-            locationResult: {
-                latitude: 37.78825,
-                longitude: -122.4324,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421,
-            }
+            test: false
         };
 
+        this.locationResult = {
+            latitude: 37.78825,
+            longitude: -122.4324,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+        };
         this.spContainerScaleXValue = [];
     }
 
@@ -66,18 +67,15 @@ class MainMap extends Component {
             })
         }
 
-        let animatedTranslateY = [];
         let animatedScaleX = [];
         let animatedOpacity = [];
         for (let i = 0; this.state.items.length > i; i++) {
-            animatedTranslateY.push(new Animated.Value(height));
             animatedScaleX.push(new Animated.Value(0.9));
             animatedOpacity.push(new Animated.Value(1))
 
         }
 
         this.setState({
-            spContainerTranslateY: animatedTranslateY,
             spContainerScaleX: animatedScaleX,
             spContainerOpacity: animatedOpacity
         }, () => {
@@ -93,14 +91,14 @@ class MainMap extends Component {
     componentDidMount() {
         // this.getLocationAsync();
         navigator.geolocation.getCurrentPosition((position) => {
-            let pos = {
+            this.locationResult = {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421
             };
             // console.log("position", position);
-            this.setState({ locationResult: pos });
+
         });
     }
 
@@ -118,15 +116,13 @@ class MainMap extends Component {
     // };
 
 
-
-
     onStart(e, g, index) {
         this.setState({scrollEnabled: false});
-        this.scrollViewRef.scrollTo({
-            x: width * index,
-            y: 0,
-            animation: false
-        });
+        // this.scrollViewRef.scrollTo({
+        //     x: width * index,
+        //     y: 0,
+        //     animation: false
+        // });
         // this.shouldChangeScroll = true;
     }
 
@@ -167,7 +163,7 @@ class MainMap extends Component {
 
         Animated.parallel([
             ...opacityArrayAnim,
-            Animated.timing(spContainerTranslateY[index], {
+            Animated.timing(spContainerTranslateY, {
                 duration: 0,
                 toValue: this.newPosition < 0 ? 0 : this.newPosition,
                 useNativeDriver: true
@@ -205,7 +201,7 @@ class MainMap extends Component {
         });
         Animated.parallel([
             ...opacityArrayAnim,
-            Animated.timing(spContainerTranslateY[index], {
+            Animated.timing(spContainerTranslateY, {
                 duration,
                 toValue: this.shoiuldGoToTop ? 0 : (layoutHeight - FIRST_LEVEL_HEIGHT),
                 useNativeDriver: true,
@@ -226,12 +222,11 @@ class MainMap extends Component {
 
     _renderSp = () => {
 
-        const {spContainerTranslateY, spContainerOpacity} = this.state;
+        const {spContainerOpacity} = this.state;
         return this.state.items.map((item, index) => {
             return (<Animated.View key={index} {...this._panResponder(index).panHandlers}
                                    style={{
                                        transform: [
-                                           {translateY: spContainerTranslateY[index]},
                                            {scale: this.spContainerScaleXValue.length > 0 ? this.spContainerScaleXValue[index] : 0},
                                        ],
                                        opacity: spContainerOpacity[index],
@@ -254,14 +249,13 @@ class MainMap extends Component {
                     this.setState({layoutHeight: height}, () => {
 
                         let animationParalel = [];
-                        this.state.spContainerTranslateY.map((item) => {
-                            animationParalel.push(Animated.timing(item, {
+                            animationParalel.push(Animated.timing(this.state.spContainerTranslateY, {
                                 duration: 100,
                                 toValue: height - FIRST_LEVEL_HEIGHT,
                                 easing: Easing.out(Easing.cubic),
                                 useNativeDriver: true
                             }))
-                        });
+
 
                         Animated.parallel(animationParalel).start();
 
@@ -271,17 +265,26 @@ class MainMap extends Component {
                   style={{flex: 1}}>
                 <MapView
                     style={{width, height}}
-                    initialRegion={this.state.locationResult}
+                    initialRegion={this.locationResult}
                 />
 
-                <ScrollView ref={(ref) => {
+                <Animated.ScrollView  onMomentumScrollBegin={(event) => {
+                    console.log(event.nativeEvent);
+                }} pointerEvents={this.state.test ? "none" : "auto"} ref={(ref) => {
                     this.scrollViewRef = ref;
                 }} scrollEnabled={this.state.scrollEnabled} horizontal showsHorizontalScrollIndicator={false}
-                            style={{position: 'absolute', bottom: 0, left: 0, right: 0}}>
+                            style={{position: 'absolute', bottom: 0, left: 0, right: 0,
+
+                                transform: [
+                                    {translateY: this.state.spContainerTranslateY},
+                                ],
+
+
+                            }}>
                     <View style={{flexDirection: 'row'}}>
                         {this._renderSp()}
                     </View>
-                </ScrollView>
+                </Animated.ScrollView>
             </View>
         );
     }
