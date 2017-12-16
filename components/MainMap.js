@@ -269,6 +269,7 @@ class MainMap extends Component {
                     ]
                 }}>
                 <Swiper
+                    scrollEnabled={this.state.scrollEnabled}
                     showsPagination={false}
                     showsButtons={false}>
                     {this._renderSp()}
