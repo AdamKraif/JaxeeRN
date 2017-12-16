@@ -5,12 +5,13 @@ import {
     Text,
     ScrollView,
     PanResponder,
+    TouchableHighlight,
     Animated,
     Easing
 } from 'react-native';
 import MapView from 'react-native-maps';
 import Swiper from 'react-native-swiper';
-
+import AnimatedMarker from './AnimatedMarker'
 const {height, width} = Dimensions.get('window');
 const FIRST_LEVEL_HEIGHT = 80;
 
@@ -20,21 +21,40 @@ class MainMap extends Component {
         super();
 
         this.state = {
-            items: [{name: 'אני עובד'}, {name: 'אני עובד'}],
+            items: [{name: 'אני עובד1'}, {name: 'אני עובד2'}],
             scrollEnabled: true,
             layoutHeight: 0,
             spContainerTranslateY: new Animated.Value(height),
             spContainerScaleX: new Animated.Value(0),
             spContainerOpacity: [],
-            test: false
+            locationResult: {
+                latitude: 37.78825,
+                longitude: -122.4324,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421,
+            },
+            cardIndex: 0,
+            test: false,
+            markers : [
+                {
+                    id: 0,
+                    amount: 1,
+                    coordinate: {
+                        latitude: 37.78825,
+                        longitude: -122.4324,
+                    },
+                },
+                {
+                    id: 1,
+                    amount: 2,
+                    coordinate: {
+                        latitude: 37.78825 + 0.004,
+                        longitude: -122.4324 - 0.004,
+                    },
+                }
+            ]
         };
 
-        this.locationResult = {
-            latitude: 37.78825,
-            longitude: -122.4324,
-            latitudeDelta: 0.0922,
-            longitudeDelta: 0.0421,
-        };
 
         this.spContainerScaleXValue = this.state.spContainerScaleX.interpolate({
             inputRange: [0, 1],
@@ -86,14 +106,32 @@ class MainMap extends Component {
     componentDidMount() {
         // this.getLocationAsync();
         navigator.geolocation.getCurrentPosition((position) => {
-            this.locationResult = {
+            alert("position: " + JSON.stringify(position));
+            this.setState({locationResult: {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude,
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421
-            };
-            // console.log("position", position);
-
+            },
+            markers : [
+                    {
+                        id: 0,
+                        amount: 1,
+                        coordinate: {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                        },
+                    },
+                    {
+                        id: 1,
+                        amount: 2,
+                        coordinate: {
+                            latitude: position.coords.latitude + 0.004,
+                            longitude: position.coords.longitude - 0.004,
+                        },
+                    }
+                ]
+            });
         });
     }
 
@@ -113,12 +151,6 @@ class MainMap extends Component {
 
     onStart(e, g, index) {
         this.setState({scrollEnabled: false});
-        // this.scrollViewRef.scrollTo({
-        //     x: width * index,
-        //     y: 0,
-        //     animation: false
-        // });
-        // this.shouldChangeScroll = true;
     }
 
     onMove(e, g, index) {
@@ -227,12 +259,38 @@ class MainMap extends Component {
                                        opacity: spContainerOpacity[index],
                                        width: width,
                                        height: this.state.layoutHeight,
-                                       backgroundColor: 'red',
+                                       backgroundColor: '#5e5587',
                                    }}>
 
-                <Text>{item.name}</Text>
+                <Text style={{color: 'white'}}>{item.name}</Text>
             </Animated.View>)
         });
+    };
+
+    _renderMarkers = () => {
+
+        return (this.state.markers.map((marker, i) => {
+            return (
+                <TouchableHighlight
+                    key={marker.id}
+                    onPress={() => {this.setState({cardIndex: marker.id})}}>
+                    <MapView.Marker
+                        coordinate={marker.coordinate}
+                    >
+                        <AnimatedMarker
+                            style={{
+                                          opacity: this.state.cardIndex === marker.id ? 1 : 0.7,
+                                          transform: [
+                                            { scale: this.state.cardIndex === marker.id ? 1.4 : 1 },
+                                          ],
+                                        }}
+                            amount={marker.amount}
+                        />
+                    </MapView.Marker>
+                </TouchableHighlight>
+            );
+        }))
+
     };
 
     render() {
@@ -249,7 +307,7 @@ class MainMap extends Component {
                             toValue: height - FIRST_LEVEL_HEIGHT,
                             easing: Easing.out(Easing.cubic),
                             useNativeDriver: true
-                        }))
+                        }));
 
 
                         Animated.parallel(animationParalel).start();
@@ -260,39 +318,29 @@ class MainMap extends Component {
                   style={{flex: 1}}>
                 <MapView
                     style={{width, height}}
-                    initialRegion={this.locationResult}
-                />
+                    region={this.state.locationResult}
+                >
+                    {this._renderMarkers()}
+                </MapView>
                 <Animated.View style={{
-                    position: 'absolute', bottom: 0, left: 0, right: 0,top:0,
+                    position: 'absolute', bottom: 0, left: 0, right: 0, top: 0,
                     transform: [
                         {translateY: this.state.spContainerTranslateY},
                     ]
                 }}>
-                <Swiper
-                    scrollEnabled={this.state.scrollEnabled}
-                    showsPagination={false}
-                    showsButtons={false}>
-                    {this._renderSp()}
-                </Swiper>
+                    <Swiper
+                        loop={false}
+                        scrollEnabled={this.state.scrollEnabled}
+                        showsPagination={false}
+                        showsButtons={false}
+                        index={this.state.cardIndex}
+                        onIndexChanged={(index) => {
+                            this.setState({cardIndex: index});
+                        }}
+                    >
+                        {this._renderSp()}
+                    </Swiper>
                 </Animated.View>
-
-
-                {/*<Animated.ScrollView */}
-                {/* pointerEvents={this.state.test ? "none" : "auto"} ref={(ref) => {*/}
-                {/*this.scrollViewRef = ref;*/}
-                {/*}} scrollEnabled={this.state.scrollEnabled} horizontal showsHorizontalScrollIndicator={false}*/}
-                {/*style={{position: 'absolute', bottom: 0, left: 0, right: 0,*/}
-
-                {/*transform: [*/}
-                {/*{translateY: this.state.spContainerTranslateY},*/}
-                {/*],*/}
-
-
-                {/*}}>*/}
-                {/*<View style={{flexDirection: 'row'}}>*/}
-                {/*{this._renderSp()}*/}
-                {/*</View>*/}
-                {/*</Animated.ScrollView>*/}
             </View>
         );
     }
