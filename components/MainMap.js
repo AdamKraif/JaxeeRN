@@ -1922,7 +1922,7 @@ class MainMap extends Component {
                       width: this.spContainerImageWidth,
                       height: this.spContainerImageHeight
                     }}
-                    source={{uri: this.state.items[item].imageUrl}}
+                    source={{uri: this.state.items[item].photoURL}}
                 />
                 <Text style={{color: 'white', marginLeft: 15}}>{this.state.items[item].name + " " + this.state.items[item].lastname}</Text>
             </Animated.View>)
