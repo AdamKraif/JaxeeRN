@@ -12,6 +12,7 @@ import {
 import MapView from 'react-native-maps';
 import Swiper from 'react-native-swiper';
 import AnimatedMarker from './AnimatedMarker'
+
 const {height, width} = Dimensions.get('window');
 const FIRST_LEVEL_HEIGHT = 80;
 
@@ -34,8 +35,8 @@ class MainMap extends Component {
                 longitudeDelta: 0.0421,
             },
             cardIndex: 0,
-            test: false,
-            markers : [
+            visibleSwiper: false,
+            markers: [
                 {
                     id: 0,
                     amount: 1,
@@ -107,13 +108,14 @@ class MainMap extends Component {
         // this.getLocationAsync();
         navigator.geolocation.getCurrentPosition((position) => {
             alert("position: " + JSON.stringify(position));
-            this.setState({locationResult: {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421
-            },
-            markers : [
+            this.setState({
+                locationResult: {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421
+                },
+                markers: [
                     {
                         id: 0,
                         amount: 1,
@@ -133,6 +135,12 @@ class MainMap extends Component {
                 ]
             });
         });
+
+        setTimeout(() => {
+            this.setState({
+                visibleSwiper: true
+            });
+        }, 100);
     }
 
 
@@ -273,17 +281,22 @@ class MainMap extends Component {
             return (
                 <TouchableHighlight
                     key={marker.id}
-                    onPress={() => {this.setState({cardIndex: marker.id})}}>
+                    onPress={() => {
+                        this.swiperRef.scrollBy((marker.id - this.state.cardIndex), true);
+
+                        this.setState({cardIndex: marker.id})
+                    }}
+                >
                     <MapView.Marker
                         coordinate={marker.coordinate}
                     >
                         <AnimatedMarker
                             style={{
-                                          opacity: this.state.cardIndex === marker.id ? 1 : 0.7,
-                                          transform: [
-                                            { scale: this.state.cardIndex === marker.id ? 1.4 : 1 },
-                                          ],
-                                        }}
+                                opacity: this.state.cardIndex === marker.id ? 1 : 0.7,
+                                transform: [
+                                    {scale: this.state.cardIndex === marker.id ? 1.4 : 1},
+                                ],
+                            }}
                             amount={marker.amount}
                         />
                     </MapView.Marker>
@@ -323,23 +336,26 @@ class MainMap extends Component {
                     {this._renderMarkers()}
                 </MapView>
                 <Animated.View style={{
+                    elevation: 50,
                     position: 'absolute', bottom: 0, left: 0, right: 0, top: 0,
                     transform: [
                         {translateY: this.state.spContainerTranslateY},
                     ]
                 }}>
-                    <Swiper
+                    {this.state.visibleSwiper ? <Swiper
+                        ref={(ref) => {
+                            this.swiperRef = ref;
+                        }}
                         loop={false}
                         scrollEnabled={this.state.scrollEnabled}
                         showsPagination={false}
                         showsButtons={false}
-                        index={this.state.cardIndex}
                         onIndexChanged={(index) => {
                             this.setState({cardIndex: index});
                         }}
                     >
                         {this._renderSp()}
-                    </Swiper>
+                    </Swiper> : null}
                 </Animated.View>
             </View>
         );
