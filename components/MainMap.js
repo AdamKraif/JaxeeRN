@@ -43,6 +43,8 @@ class MainMap extends Component {
                     coordinate: {
                         latitude: 37.78825,
                         longitude: -122.4324,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
                     },
                 },
                 {
@@ -51,6 +53,8 @@ class MainMap extends Component {
                     coordinate: {
                         latitude: 37.78825 + 0.004,
                         longitude: -122.4324 - 0.004,
+                        latitudeDelta: 0.0922,
+                        longitudeDelta: 0.0421,
                     },
                 }
             ]
@@ -107,29 +111,32 @@ class MainMap extends Component {
     componentDidMount() {
         // this.getLocationAsync();
         navigator.geolocation.getCurrentPosition((position) => {
-            alert("position: " + JSON.stringify(position));
-            this.setState({
-                locationResult: {
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421
-                },
-                markers: [
+            // alert("position: " + JSON.stringify(position));
+            this.setState({locationResult: {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                latitudeDelta: 0.0922,
+                longitudeDelta: 0.0421
+            },
+                markers : [
                     {
                         id: 0,
                         amount: 1,
                         coordinate: {
                             latitude: position.coords.latitude,
                             longitude: position.coords.longitude,
+                            latitudeDelta: 0.0922,
+                            longitudeDelta: 0.0421
                         },
                     },
                     {
                         id: 1,
                         amount: 2,
                         coordinate: {
-                            latitude: position.coords.latitude + 0.004,
-                            longitude: position.coords.longitude - 0.004,
+                            latitude: position.coords.latitude + 0.006,
+                            longitude: position.coords.longitude - 0.006,
+                            latitudeDelta: 0.0922,
+                            longitudeDelta: 0.0421
                         },
                     }
                 ]
@@ -282,11 +289,10 @@ class MainMap extends Component {
                 <TouchableHighlight
                     key={marker.id}
                     onPress={() => {
+                        console.log("marker.id", marker.id);
                         this.swiperRef.scrollBy((marker.id - this.state.cardIndex), true);
-
-                        this.setState({cardIndex: marker.id})
-                    }}
-                >
+                        this.setState({cardIndex: marker.id, locationResult: this.state.markers[marker.id].coordinate})
+                    }}>
                     <MapView.Marker
                         coordinate={marker.coordinate}
                     >
@@ -351,7 +357,9 @@ class MainMap extends Component {
                         showsPagination={false}
                         showsButtons={false}
                         onIndexChanged={(index) => {
-                            this.setState({cardIndex: index});
+                            if (this.state.markers[index]) {
+                             this.setState({cardIndex: index, locationResult: this.state.markers[index].coordinate});
+                            }
                         }}
                     >
                         {this._renderSp()}
