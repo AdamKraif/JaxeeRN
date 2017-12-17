@@ -28,6 +28,8 @@ class MainMap extends Component {
             layoutHeight: 0,
             spContainerTranslateY: new Animated.Value(height),
             spContainerScaleX: new Animated.Value(0),
+            overlayOpacityAnim: new Animated.Value(0),
+            overlayScaleAnim: new Animated.Value(1),
             locationResult: {
                 latitude: 37.78825,
                 longitude: -122.4324,
@@ -64,6 +66,16 @@ class MainMap extends Component {
         this.spContainerScaleXValue = this.state.spContainerScaleX.interpolate({
             inputRange: [0, 1],
             outputRange: [0.9, 1]
+        });
+
+        this.overlayOpacityValue = this.state.overlayOpacityAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 0.6]
+        });
+
+        this.overlayScaleValue = this.state.overlayScaleAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.99, 1]
         });
     }
 
@@ -164,7 +176,7 @@ class MainMap extends Component {
         const {dy} = g;
         const {locationY} = e.nativeEvent;
 
-        const {spContainerTranslateY, spContainerScaleX, layoutHeight} = this.state;
+        const {spContainerTranslateY, spContainerScaleX, layoutHeight, overlayOpacityAnim, overlayScaleAnim} = this.state;
         if (this.shoiuldGoToTop) {
             this.newPosition = dy;
         } else {
@@ -184,10 +196,7 @@ class MainMap extends Component {
         const present = (1 - (this.newPosition / layoutHeight));
 
 
-        let opacityArrayAnim = [];
-
         Animated.parallel([
-            ...opacityArrayAnim,
             Animated.timing(spContainerTranslateY, {
                 duration: 0,
                 toValue: this.newPosition < 0 ? 0 : this.newPosition,
@@ -197,14 +206,25 @@ class MainMap extends Component {
                 duration: 0,
                 toValue: present > 1 ? 1 : present,
                 useNativeDriver: true
+            }),
+            Animated.timing(overlayOpacityAnim, {
+                duration: 0,
+                toValue: present > 1 ? 1 : present,
+                useNativeDriver: true
+            }),
+            Animated.timing(overlayScaleAnim, {
+                duration: 0,
+                toValue: present > 1 ? 0 : 1 - present,
+                useNativeDriver: true
             })
+
         ]).start();
 
     }
 
     onEnd(e, g, index) {
 
-        const {spContainerTranslateY, layoutHeight, spContainerScaleX} = this.state;
+        const {spContainerTranslateY, layoutHeight, spContainerScaleX, overlayOpacityAnim, overlayScaleAnim} = this.state;
         const duration = 200;
 
         if (this.shoiuldGoToTop) {
@@ -215,10 +235,8 @@ class MainMap extends Component {
 
         // console.log("this.shoiuldGoToTop", this.shoiuldGoToTop);
 
-        let opacityArrayAnim = [];
 
         Animated.parallel([
-            ...opacityArrayAnim,
             Animated.timing(spContainerTranslateY, {
                 duration,
                 toValue: this.shoiuldGoToTop ? 0 : (layoutHeight - FIRST_LEVEL_HEIGHT),
@@ -229,7 +247,20 @@ class MainMap extends Component {
                 duration,
                 toValue: this.shoiuldGoToTop ? 1 : 0,
                 useNativeDriver: true
-            })]).start(() => {
+            }),
+
+            Animated.timing(overlayOpacityAnim, {
+                duration,
+                toValue: this.shoiuldGoToTop ? 1 : 0,
+                useNativeDriver: true
+            }),
+            Animated.timing(overlayScaleAnim, {
+                duration,
+                toValue: this.shoiuldGoToTop ? 0 : 1,
+                useNativeDriver: true
+            }),
+
+        ]).start(() => {
         });
         if (this.shoiuldGoToTop) {
             this.setState({scrollEnabled: false});
@@ -312,12 +343,19 @@ class MainMap extends Component {
                 }
             }}
                   style={{flex: 1}}>
-                <MapView
-                    style={{...StyleSheet.absoluteFillObject}}
+                <MapView.Animated
+                    style={{...StyleSheet.absoluteFillObject, transform: [{scale: this.overlayScaleValue}]}}
                     region={this.state.locationResult}
                 >
                     {this._renderMarkers()}
-                </MapView>
+                </MapView.Animated>
+
+                <Animated.View pointerEvents={"none"}
+                               style={[StyleSheet.absoluteFillObject, {
+                                   backgroundColor: 'black',
+                                   opacity: this.overlayOpacityValue
+                               }]}/>
+
                 <Animated.View style={{
                     elevation: 50,
                     ...StyleSheet.absoluteFillObject,
