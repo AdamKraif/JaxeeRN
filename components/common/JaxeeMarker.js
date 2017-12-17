@@ -4,31 +4,44 @@ import {
     View,
     Text,
     Animated,
+    Image
 } from 'react-native';
 import MapView from 'react-native-maps';
-import AnimatedMarker from "./AnimatedMarker";
-
 
 class JaxeeMarker extends Component {
 
     render() {
-        const {marker, cardIndex, onPress} = this.props;
+        const {marker, cardIndex, onPress, id} = this.props;
 
+        console.log('marker', marker.stripedEmail);
         return <View>
             <MapView.Marker style={{
-                opacity: cardIndex === marker.id ? 1 : 0.7,
-                transform: [
-                    {scale: cardIndex === marker.id ? 1.1 : 1},
-                ],
-            }} key={marker.id}
-                            coordinate={marker.coordinate}
+                        opacity: cardIndex === id ? 1 : 0.7,
+                        width: 44,
+                        height: 44,
+                        borderRadius: 22,
+                        borderWidth: 1,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        borderColor: '#5e5587',
+                            transform: [
+                                {scale: cardIndex === id ? 1.1 : 1},
+                            ],
+                        }}
+                            key={id}
+                            coordinate={marker.location[0]}
                             onPress={() => {
                                 onPress && onPress();
                             }}
             >
-                <AnimatedMarker
-
-                    amount={marker.amount}
+                <Image
+                    style={{
+                        width: 40,
+                        height: 40,
+                        borderRadius: 20,
+                        borderColor: '#5e5587',
+                    }}
+                    source={{ uri: marker.photoURL }}
                 />
             </MapView.Marker>
         </View>

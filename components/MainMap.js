@@ -10,11 +10,13 @@ import {
 import MapView from 'react-native-maps';
 import Swiper from 'react-native-swiper';
 import jaxeeData from "./data/jaxeeData";
+import styling from "./data/mapStyling";
 import SpCard from "./common/SpCard";
 import JaxeeMarker from "./common/JaxeeMarker";
 
+
 const {height, width} = Dimensions.get('window');
-const FIRST_LEVEL_HEIGHT = 80;
+const FIRST_LEVEL_HEIGHT = 90;
 
 class MainMap extends Component {
 
@@ -27,9 +29,9 @@ class MainMap extends Component {
             layoutHeight: 0,
             spContainerTranslateY: new Animated.Value(height),
             spContainerScaleX: new Animated.Value(0),
-            spContainerImageWidthAnim: new Animated.Value(30),
-            spContainerImageHeightAnim: new Animated.Value(30),
+            spCardImageScale: new Animated.Value(0.1),
             overlayOpacityAnim: new Animated.Value(0),
+            spSmallCardOpacityAnim: new Animated.Value(1),
             overlayScaleAnim: new Animated.Value(1),
             locationResult: {
                 latitude: 37.78825,
@@ -38,29 +40,7 @@ class MainMap extends Component {
                 longitudeDelta: 0.0421,
             },
             cardIndex: 0,
-            visibleSwiper: false,
-            markers: [
-                {
-                    id: 0,
-                    amount: 1,
-                    coordinate: {
-                        latitude: 37.78825,
-                        longitude: -122.4324,
-                        latitudeDelta: 0.0922,
-                        longitudeDelta: 0.0421,
-                    },
-                },
-                {
-                    id: 1,
-                    amount: 2,
-                    coordinate: {
-                        latitude: 37.78825 + 0.004,
-                        longitude: -122.4324 - 0.004,
-                        latitudeDelta: 0.0922,
-                        longitudeDelta: 0.0421,
-                    },
-                }
-            ]
+            visibleSwiper: false
         };
 
 
@@ -69,19 +49,20 @@ class MainMap extends Component {
             outputRange: [0.9, 1]
         });
 
-        this.spContainerImageWidthValue = this.state.spContainerImageWidthAnim.interpolate({
+        this.spCardImageScale = this.state.spCardImageScale.interpolate({
             inputRange: [0, 1],
-            outputRange: [30, width]
+            outputRange: [0.3, 1]
         });
 
-        this.spContainerImageHeightValue = this.state.spContainerImageHeightAnim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [30, height * 0.35]
-        });
 
         this.overlayOpacityValue = this.state.overlayOpacityAnim.interpolate({
             inputRange: [0, 1],
             outputRange: [0, 0.6]
+        });
+
+        this.spSmallCardOpacityAnim = this.state.spSmallCardOpacityAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 1]
         });
 
         this.overlayScaleValue = this.state.overlayScaleAnim.interpolate({
@@ -129,29 +110,7 @@ class MainMap extends Component {
                     longitude: position.coords.longitude,
                     latitudeDelta: 0.0922,
                     longitudeDelta: 0.0421
-                },
-                markers: [
-                    {
-                        id: 0,
-                        amount: 1,
-                        coordinate: {
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                            latitudeDelta: 0.0922,
-                            longitudeDelta: 0.0421
-                        },
-                    },
-                    {
-                        id: 1,
-                        amount: 2,
-                        coordinate: {
-                            latitude: position.coords.latitude + 0.006,
-                            longitude: position.coords.longitude - 0.006,
-                            latitudeDelta: 0.0922,
-                            longitudeDelta: 0.0421
-                        },
-                    }
-                ]
+                }
             });
         });
 
@@ -161,19 +120,6 @@ class MainMap extends Component {
             });
         }, 100);
     }
-
-
-    // getLocationAsync = async () => {
-    //     let { status } = await Permissions.askAsync(Permissions.LOCATION);
-    //     if (status !== 'granted') {
-    //         this.setState({
-    //             locationResult: 'Permission to access location was denied',
-    //         });
-    //     }
-    //
-    //     let location = await Location.getCurrentPositionAsync({});
-    //     this.setState({ locationResult: JSON.stringify(location) });
-    // };
 
 
     onStart(e, g, index) {
@@ -190,8 +136,8 @@ class MainMap extends Component {
             layoutHeight,
             overlayOpacityAnim,
             overlayScaleAnim,
-            spContainerImageWidthAnim,
-            spContainerImageHeightAnim
+            spSmallCardOpacityAnim,
+            spCardImageScale
         } = this.state;
 
         if (this.shoiuldGoToTop) {
@@ -214,17 +160,19 @@ class MainMap extends Component {
                 toValue: present > 1 ? 1 : present,
                 useNativeDriver: true
             }),
-            Animated.timing(spContainerImageWidthAnim, {
+            Animated.timing(spCardImageScale, {
                 duration: 0,
                 toValue: present > 1 ? 1 : present,
-            }),
-            Animated.timing(spContainerImageHeightAnim, {
-                duration: 0,
-                toValue: present > 1 ? 1 : present,
+                useNativeDriver: true
             }),
             Animated.timing(overlayOpacityAnim, {
                 duration: 0,
                 toValue: present > 1 ? 1 : present,
+                useNativeDriver: true
+            }),
+            Animated.timing(spSmallCardOpacityAnim, {
+                duration: 10,
+                toValue: 0,
                 useNativeDriver: true
             }),
             Animated.timing(overlayScaleAnim, {
@@ -245,8 +193,8 @@ class MainMap extends Component {
             spContainerScaleX,
             overlayOpacityAnim,
             overlayScaleAnim,
-            spContainerImageWidthAnim,
-            spContainerImageHeightAnim
+            spSmallCardOpacityAnim,
+            spCardImageScale
         } = this.state;
 
         const duration = 200;
@@ -269,13 +217,10 @@ class MainMap extends Component {
                 toValue: this.shoiuldGoToTop ? 1 : 0,
                 useNativeDriver: true
             }),
-            Animated.timing(spContainerImageWidthAnim, {
-                duration: 0,
+            Animated.timing(spCardImageScale, {
+                duration,
                 toValue: this.shoiuldGoToTop ? 1 : 0,
-            }),
-            Animated.timing(spContainerImageHeightAnim, {
-                duration: 0,
-                toValue: this.shoiuldGoToTop ? 1 : 0,
+                useNativeDriver: true
             }),
             Animated.timing(overlayOpacityAnim, {
                 duration,
@@ -289,6 +234,11 @@ class MainMap extends Component {
             }),
 
         ]).start(() => {
+            Animated.timing(spSmallCardOpacityAnim, {
+                duration: 0.5,
+                toValue: 1,
+                useNativeDriver: true
+            }).start();
             if (this.shoiuldGoToTop) {
                 this.setState({scrollEnabled: false});
             } else {
@@ -313,8 +263,9 @@ class MainMap extends Component {
                                        height: this.state.layoutHeight,
                                    }}>
 
-                <SpCard spContainerImageWidth={this.spContainerImageWidthValue}
-                        spContainerImageHeight={this.spContainerImageHeightValue}
+                <SpCard shoiuldGoToTop={this.shoiuldGoToTop}
+                        spSmallCardOpacityAnim={this.spSmallCardOpacityAnim}
+                        spCardImageScale={this.spCardImageScale}
                         spItem={items[spItem]}/>
 
             </Animated.View>)
@@ -323,16 +274,17 @@ class MainMap extends Component {
 
     _renderMarkers = () => {
 
-        const {cardIndex, markers} = this.state;
-        return (markers.map((marker, i) => {
+        const {cardIndex} = this.state;
+        return ( Object.keys(this.state.items).map((marker, i) => {
+
 
             return (<JaxeeMarker onPress={() => {
-                    this.swiperRef.scrollBy((marker.id - cardIndex), true);
+                    this.swiperRef.scrollBy((i - cardIndex), true);
                     this.setState({
-                        cardIndex: marker.id,
-                        locationResult: marker.coordinate
+                        cardIndex: i,
+                        locationResult:  this.state.items[marker].location[0]
                     })
-                }} key={i} cardIndex={cardIndex} marker={marker}/>
+                }} key={i} cardIndex={cardIndex} id={i} marker={this.state.items[marker]}/>
             );
         }))
 
@@ -364,6 +316,7 @@ class MainMap extends Component {
                 <MapView.Animated
                     style={{...StyleSheet.absoluteFillObject, transform: [{scale: this.overlayScaleValue}]}}
                     region={this.state.locationResult}
+                    customMapStyle={styling.styles}
                 >
                     {this._renderMarkers()}
                 </MapView.Animated>
@@ -381,21 +334,19 @@ class MainMap extends Component {
                     ]
                 }}>
                     {this.state.visibleSwiper ? <Swiper
-                        ref={(ref) => {
+                            ref={(ref) => {
                             this.swiperRef = ref;
                         }}
-                        loop={false}
-                        scrollEnabled={this.state.scrollEnabled}
-                        showsPagination={false}
-                        showsButtons={false}
-                        onIndexChanged={(index) => {
-                            if (this.state.markers[index]) {
-                                this.setState({cardIndex: index, locationResult: this.state.markers[index].coordinate});
-                            }
-                        }}
-                    >
-                        {this._renderSp()}
-                    </Swiper> : null}
+                            loop={false}
+                            scrollEnabled={this.state.scrollEnabled}
+                            showsPagination={false}
+                            showsButtons={false}
+                            onIndexChanged={(index) => {
+                                this.setState({cardIndex: index, locationResult: this.state.items[Object.keys(this.state.items)[index]].location[0]});
+                            }}
+                        >
+                            {this._renderSp()}
+                        </Swiper> : null}
                 </Animated.View>
             </View>
         );
