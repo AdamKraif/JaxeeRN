@@ -117,7 +117,7 @@ class MainMap extends Component {
                 latitudeDelta: 0.0922,
                 longitudeDelta: 0.0421
             },
-            markers : [
+                markers : [
                     {
                         id: 0,
                         amount: 1,
@@ -125,7 +125,7 @@ class MainMap extends Component {
                             latitude: position.coords.latitude,
                             longitude: position.coords.longitude,
                             latitudeDelta: 0.0922,
-                            longitudeDelta: 0.0421,
+                            longitudeDelta: 0.0421
                         },
                     },
                     {
@@ -135,7 +135,7 @@ class MainMap extends Component {
                             latitude: position.coords.latitude + 0.006,
                             longitude: position.coords.longitude - 0.006,
                             latitudeDelta: 0.0922,
-                            longitudeDelta: 0.0421,
+                            longitudeDelta: 0.0421
                         },
                     }
                 ]
@@ -281,7 +281,10 @@ class MainMap extends Component {
             return (
                 <TouchableHighlight
                     key={marker.id}
-                    onPress={() => {this.setState({cardIndex: marker.id, locationResult: this.state.markers[marker.id].coordinate})}}>
+                    onPress={() => {
+                        console.log("marker.id", marker.id);
+                        this.setState({cardIndex: marker.id, locationResult: this.state.markers[marker.id].coordinate})
+                    }}>
                     <MapView.Marker
                         coordinate={marker.coordinate}
                     >
@@ -343,7 +346,9 @@ class MainMap extends Component {
                         showsButtons={false}
                         index={this.state.cardIndex}
                         onIndexChanged={(index) => {
-                            this.setState({cardIndex: index, locationResult: this.state.markers[index].coordinate});
+                            if (this.state.markers[index]) {
+                             this.setState({cardIndex: index, locationResult: this.state.markers[index].coordinate});
+                            }
                         }}
                     >
                         {this._renderSp()}
