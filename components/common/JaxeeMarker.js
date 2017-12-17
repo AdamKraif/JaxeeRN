@@ -24,6 +24,7 @@ class JaxeeMarker extends Component {
                         alignItems: 'center',
                         justifyContent: 'center',
                         borderColor: '#5e5587',
+                        borderStyle: 'solid',
                             transform: [
                                 {scale: cardIndex === id ? 1.1 : 1},
                             ],
