@@ -258,24 +258,29 @@ class MainMap extends Component {
 
     _renderMarkers = () => {
 
-        return (this.state.markers.map((marker, i) => {
+        const {cardIndex, markers} = this.state;
+        return (markers.map((marker, i) => {
+            console.log("marker.id", cardIndex, marker.id);
+
             return (
 
-                <MapView.Marker key={marker.id}
-                    coordinate={marker.coordinate}
-                    onPress={() => {
-                        console.log("marker.id", marker.id);
-                        this.swiperRef.scrollBy((marker.id - this.state.cardIndex), true);
-                        this.setState({cardIndex: marker.id, locationResult: this.state.markers[marker.id].coordinate})
-                    }}
+                <MapView.Marker style={{
+                    opacity: cardIndex === marker.id ? 1 : 0.7,
+                    transform: [
+                        {scale: cardIndex === marker.id ? 1.1 : 1},
+                    ],
+                }} key={marker.id}
+                                coordinate={marker.coordinate}
+                                onPress={() => {
+                                    this.swiperRef.scrollBy((marker.id - cardIndex), true);
+                                    this.setState({
+                                        cardIndex: marker.id,
+                                        locationResult: markers[marker.id].coordinate
+                                    })
+                                }}
                 >
                     <AnimatedMarker
-                        style={{
-                            opacity: this.state.cardIndex === marker.id ? 1 : 0.7,
-                            transform: [
-                                {scale: this.state.cardIndex === marker.id ? 1.1 : 1},
-                            ],
-                        }}
+
                         amount={marker.amount}
                     />
                 </MapView.Marker>
