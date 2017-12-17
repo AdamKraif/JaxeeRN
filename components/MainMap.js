@@ -7,6 +7,7 @@ import {
     PanResponder,
     TouchableHighlight,
     Animated,
+    Image,
     Easing
 } from 'react-native';
 import MapView from 'react-native-maps';
@@ -1645,6 +1646,8 @@ class MainMap extends Component {
             layoutHeight: 0,
             spContainerTranslateY: new Animated.Value(height),
             spContainerScaleX: new Animated.Value(0),
+            spContainerImageWidth: new Animated.Value(30),
+            spContainerImageHeight: new Animated.Value(30),
             spContainerOpacity: [],
             locationResult: {
                 latitude: 37.78825,
@@ -1682,6 +1685,16 @@ class MainMap extends Component {
         this.spContainerScaleXValue = this.state.spContainerScaleX.interpolate({
             inputRange: [0, 1],
             outputRange: [0.9, 1]
+        });
+
+        this.spContainerImageWidth = this.state.spContainerImageWidth.interpolate({
+            inputRange: [0, 1],
+            outputRange: [30, width]
+        });
+
+        this.spContainerImageHeight = this.state.spContainerImageHeight.interpolate({
+            inputRange: [0, 1],
+            outputRange: [30, height * 0.35]
         });
     }
 
@@ -1791,7 +1804,7 @@ class MainMap extends Component {
         const {dy} = g;
         const {locationY} = e.nativeEvent;
 
-        const {spContainerTranslateY, spContainerScaleX, layoutHeight, spContainerOpacity} = this.state;
+        const {spContainerTranslateY, spContainerScaleX, layoutHeight, spContainerOpacity, spContainerImageWidth, spContainerImageHeight} = this.state;
         if (this.shoiuldGoToTop) {
             this.newPosition = dy;
         } else {
@@ -1832,6 +1845,14 @@ class MainMap extends Component {
                 duration: 0,
                 toValue: present > 1 ? 1 : present,
                 useNativeDriver: true
+            }),
+            Animated.timing(spContainerImageWidth, {
+                duration: 0,
+                toValue: present > 1 ? 1 : present,
+            }),
+            Animated.timing(spContainerImageHeight, {
+                duration: 0,
+                toValue: present > 1 ? 1 : present,
             })
         ]).start();
 
@@ -1839,7 +1860,7 @@ class MainMap extends Component {
 
     onEnd(e, g, index) {
 
-        const {spContainerTranslateY, layoutHeight, spContainerScaleX, spContainerOpacity} = this.state;
+        const {spContainerTranslateY, layoutHeight, spContainerScaleX, spContainerOpacity, spContainerImageWidth, spContainerImageHeight} = this.state;
         const duration = 200;
 
         if (this.shoiuldGoToTop) {
@@ -1871,6 +1892,14 @@ class MainMap extends Component {
                 duration,
                 toValue: this.shoiuldGoToTop ? 1 : 0,
                 useNativeDriver: true
+            }),
+            Animated.timing(spContainerImageWidth, {
+                duration: 0,
+                toValue: this.shoiuldGoToTop ? 1 : 0,
+            }),
+            Animated.timing(spContainerImageHeight, {
+                duration: 0,
+                toValue: this.shoiuldGoToTop ? 1 : 0,
             })]).start(() => {
         });
         if (this.shoiuldGoToTop) {
@@ -1889,13 +1918,20 @@ class MainMap extends Component {
                                        transform: [
                                            {scale: this.spContainerScaleXValue},
                                        ],
+                                       flex: 1, flexDirection: this.shoiuldGoToTop ? 'column' : 'row',
                                        opacity: spContainerOpacity[index],
                                        width: width,
                                        height: this.state.layoutHeight,
                                        backgroundColor: '#5e5587',
                                    }}>
-
-                <Text style={{color: 'white'}}>{this.state.items[item].name + " " + this.state.items[item].lastname}</Text>
+                <Animated.Image
+                    style={{
+                      width: this.spContainerImageWidth,
+                      height: this.spContainerImageHeight
+                    }}
+                    source={{uri: this.state.items[item].imageUrl}}
+                />
+                <Text style={{color: 'white', marginLeft: 15}}>{this.state.items[item].name + " " + this.state.items[item].lastname}</Text>
             </Animated.View>)
         });
     };
@@ -1967,21 +2003,21 @@ class MainMap extends Component {
                     ]
                 }}>
                     {this.state.visibleSwiper ? <Swiper
-                        ref={(ref) => {
+                            ref={(ref) => {
                             this.swiperRef = ref;
                         }}
-                        loop={false}
-                        scrollEnabled={this.state.scrollEnabled}
-                        showsPagination={false}
-                        showsButtons={false}
-                        onIndexChanged={(index) => {
+                            loop={false}
+                            scrollEnabled={this.state.scrollEnabled}
+                            showsPagination={false}
+                            showsButtons={false}
+                            onIndexChanged={(index) => {
                             if (this.state.markers[index]) {
                              this.setState({cardIndex: index, locationResult: this.state.markers[index].coordinate});
                             }
                         }}
-                    >
-                        {this._renderSp()}
-                    </Swiper> : null}
+                        >
+                            {this._renderSp()}
+                        </Swiper> : null}
                 </Animated.View>
             </View>
         );
