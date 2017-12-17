@@ -12,6 +12,7 @@ import {
 import MapView from 'react-native-maps';
 import Swiper from 'react-native-swiper';
 import AnimatedMarker from './AnimatedMarker'
+
 const {height, width} = Dimensions.get('window');
 const FIRST_LEVEL_HEIGHT = 80;
 
@@ -1652,8 +1653,8 @@ class MainMap extends Component {
                 longitudeDelta: 0.0421,
             },
             cardIndex: 0,
-            test: false,
-            markers : [
+            visibleSwiper: false,
+            markers: [
                 {
                     id: 0,
                     amount: 1,
@@ -1759,6 +1760,12 @@ class MainMap extends Component {
                 ]
             });
         });
+
+        setTimeout(() => {
+            this.setState({
+                visibleSwiper: true
+            });
+        }, 100);
     }
 
 
@@ -1901,6 +1908,7 @@ class MainMap extends Component {
                     key={marker.id}
                     onPress={() => {
                         console.log("marker.id", marker.id);
+                        this.swiperRef.scrollBy((marker.id - this.state.cardIndex), true);
                         this.setState({cardIndex: marker.id, locationResult: this.state.markers[marker.id].coordinate})
                     }}>
                     <MapView.Marker
@@ -1908,11 +1916,11 @@ class MainMap extends Component {
                     >
                         <AnimatedMarker
                             style={{
-                                          opacity: this.state.cardIndex === marker.id ? 1 : 0.7,
-                                          transform: [
-                                            { scale: this.state.cardIndex === marker.id ? 1.4 : 1 },
-                                          ],
-                                        }}
+                                opacity: this.state.cardIndex === marker.id ? 1 : 0.7,
+                                transform: [
+                                    {scale: this.state.cardIndex === marker.id ? 1.4 : 1},
+                                ],
+                            }}
                             amount={marker.amount}
                         />
                     </MapView.Marker>
@@ -1952,17 +1960,20 @@ class MainMap extends Component {
                     {this._renderMarkers()}
                 </MapView>
                 <Animated.View style={{
+                    elevation: 50,
                     position: 'absolute', bottom: 0, left: 0, right: 0, top: 0,
                     transform: [
                         {translateY: this.state.spContainerTranslateY},
                     ]
                 }}>
-                    <Swiper
+                    {this.state.visibleSwiper ? <Swiper
+                        ref={(ref) => {
+                            this.swiperRef = ref;
+                        }}
                         loop={false}
                         scrollEnabled={this.state.scrollEnabled}
                         showsPagination={false}
                         showsButtons={false}
-                        index={this.state.cardIndex}
                         onIndexChanged={(index) => {
                             if (this.state.markers[index]) {
                              this.setState({cardIndex: index, locationResult: this.state.markers[index].coordinate});
@@ -1970,7 +1981,7 @@ class MainMap extends Component {
                         }}
                     >
                         {this._renderSp()}
-                    </Swiper>
+                    </Swiper> : null}
                 </Animated.View>
             </View>
         );
