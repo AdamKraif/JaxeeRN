@@ -7,7 +7,8 @@ import {
     PanResponder,
     TouchableHighlight,
     Animated,
-    Easing
+    Easing,
+    StyleSheet
 } from 'react-native';
 import MapView from 'react-native-maps';
 import Swiper from 'react-native-swiper';
@@ -27,7 +28,6 @@ class MainMap extends Component {
             layoutHeight: 0,
             spContainerTranslateY: new Animated.Value(height),
             spContainerScaleX: new Animated.Value(0),
-            spContainerOpacity: [],
             locationResult: {
                 latitude: 37.78825,
                 longitude: -122.4324,
@@ -95,17 +95,7 @@ class MainMap extends Component {
                     this.onEnd(event, gestureState, index);
                 }
             })
-        }
-
-        let animatedOpacity = [];
-        for (let i = 0; this.state.items.length > i; i++) {
-            animatedOpacity.push(new Animated.Value(1))
-
-        }
-
-        this.setState({
-            spContainerOpacity: animatedOpacity
-        });
+        };
     }
 
     componentDidMount() {
@@ -173,7 +163,7 @@ class MainMap extends Component {
         const {dy} = g;
         const {locationY} = e.nativeEvent;
 
-        const {spContainerTranslateY, spContainerScaleX, layoutHeight, spContainerOpacity} = this.state;
+        const {spContainerTranslateY, spContainerScaleX, layoutHeight} = this.state;
         if (this.shoiuldGoToTop) {
             this.newPosition = dy;
         } else {
@@ -194,14 +184,6 @@ class MainMap extends Component {
 
 
         let opacityArrayAnim = [];
-        spContainerOpacity.map((item, i) => {
-            opacityArrayAnim.push(Animated.timing(item, {
-                duration: 0,
-                toValue: index === i ? 1 : (1 - present),
-                useNativeDriver: true
-            }))
-
-        });
 
         Animated.parallel([
             ...opacityArrayAnim,
@@ -221,7 +203,7 @@ class MainMap extends Component {
 
     onEnd(e, g, index) {
 
-        const {spContainerTranslateY, layoutHeight, spContainerScaleX, spContainerOpacity} = this.state;
+        const {spContainerTranslateY, layoutHeight, spContainerScaleX} = this.state;
         const duration = 200;
 
         if (this.shoiuldGoToTop) {
@@ -233,14 +215,7 @@ class MainMap extends Component {
         // console.log("this.shoiuldGoToTop", this.shoiuldGoToTop);
 
         let opacityArrayAnim = [];
-        spContainerOpacity.map((item, i) => {
-            opacityArrayAnim.push(Animated.timing(item, {
-                duration,
-                toValue: 1,
-                useNativeDriver: true
-            }))
 
-        });
         Animated.parallel([
             ...opacityArrayAnim,
             Animated.timing(spContainerTranslateY, {
@@ -264,14 +239,12 @@ class MainMap extends Component {
 
     _renderSp = () => {
 
-        const {spContainerOpacity} = this.state;
         return this.state.items.map((item, index) => {
             return (<Animated.View key={index} {...this._panResponder(index).panHandlers}
                                    style={{
                                        transform: [
                                            {scale: this.spContainerScaleXValue},
                                        ],
-                                       opacity: spContainerOpacity[index],
                                        width: width,
                                        height: this.state.layoutHeight,
                                        backgroundColor: '#5e5587',
@@ -336,14 +309,14 @@ class MainMap extends Component {
             }}
                   style={{flex: 1}}>
                 <MapView
-                    style={{width, height}}
+                    style={{ ...StyleSheet.absoluteFillObject}}
                     region={this.state.locationResult}
                 >
                     {this._renderMarkers()}
                 </MapView>
                 <Animated.View style={{
                     elevation: 50,
-                    position: 'absolute', bottom: 0, left: 0, right: 0, top: 0,
+                    ...StyleSheet.absoluteFillObject,
                     transform: [
                         {translateY: this.state.spContainerTranslateY},
                     ]
