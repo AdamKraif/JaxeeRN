@@ -8,7 +8,7 @@ import {
     TouchableHighlight,
     Animated,
     Easing,
-    StyleSheet
+    StyleSheet, TouchableWithoutFeedback
 } from 'react-native';
 import MapView from 'react-native-maps';
 import Swiper from 'react-native-swiper';
@@ -102,13 +102,14 @@ class MainMap extends Component {
         // this.getLocationAsync();
         navigator.geolocation.getCurrentPosition((position) => {
             // alert("position: " + JSON.stringify(position));
-            this.setState({locationResult: {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421
-            },
-                markers : [
+            this.setState({
+                locationResult: {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421
+                },
+                markers: [
                     {
                         id: 0,
                         amount: 1,
@@ -259,27 +260,25 @@ class MainMap extends Component {
 
         return (this.state.markers.map((marker, i) => {
             return (
-                <TouchableHighlight
-                    key={marker.id}
+
+                <MapView.Marker key={marker.id}
+                    coordinate={marker.coordinate}
                     onPress={() => {
                         console.log("marker.id", marker.id);
                         this.swiperRef.scrollBy((marker.id - this.state.cardIndex), true);
                         this.setState({cardIndex: marker.id, locationResult: this.state.markers[marker.id].coordinate})
-                    }}>
-                    <MapView.Marker
-                        coordinate={marker.coordinate}
-                    >
-                        <AnimatedMarker
-                            style={{
-                                opacity: this.state.cardIndex === marker.id ? 1 : 0.7,
-                                transform: [
-                                    {scale: this.state.cardIndex === marker.id ? 1.4 : 1},
-                                ],
-                            }}
-                            amount={marker.amount}
-                        />
-                    </MapView.Marker>
-                </TouchableHighlight>
+                    }}
+                >
+                    <AnimatedMarker
+                        style={{
+                            opacity: this.state.cardIndex === marker.id ? 1 : 0.7,
+                            transform: [
+                                {scale: this.state.cardIndex === marker.id ? 1.1 : 1},
+                            ],
+                        }}
+                        amount={marker.amount}
+                    />
+                </MapView.Marker>
             );
         }))
 
@@ -309,7 +308,7 @@ class MainMap extends Component {
             }}
                   style={{flex: 1}}>
                 <MapView
-                    style={{ ...StyleSheet.absoluteFillObject}}
+                    style={{...StyleSheet.absoluteFillObject}}
                     region={this.state.locationResult}
                 >
                     {this._renderMarkers()}
@@ -331,7 +330,7 @@ class MainMap extends Component {
                         showsButtons={false}
                         onIndexChanged={(index) => {
                             if (this.state.markers[index]) {
-                             this.setState({cardIndex: index, locationResult: this.state.markers[index].coordinate});
+                                this.setState({cardIndex: index, locationResult: this.state.markers[index].coordinate});
                             }
                         }}
                     >
