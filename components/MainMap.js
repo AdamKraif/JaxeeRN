@@ -8,7 +8,8 @@ import {
     TouchableHighlight,
     Animated,
     Image,
-    Easing
+    Easing,
+    StyleSheet
 } from 'react-native';
 import MapView from 'react-native-maps';
 import Swiper from 'react-native-swiper';
@@ -1649,6 +1650,8 @@ class MainMap extends Component {
             spContainerImageWidth: new Animated.Value(30),
             spContainerImageHeight: new Animated.Value(30),
             spContainerOpacity: [],
+            overlayOpacityAnim: new Animated.Value(0),
+            overlayScaleAnim: new Animated.Value(1),
             locationResult: {
                 latitude: 37.78825,
                 longitude: -122.4324,
@@ -1696,6 +1699,16 @@ class MainMap extends Component {
             inputRange: [0, 1],
             outputRange: [30, height * 0.35]
         });
+
+        this.overlayOpacityValue = this.state.overlayOpacityAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0, 0.6]
+        });
+
+        this.overlayScaleValue = this.state.overlayScaleAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.99, 1]
+        });
     }
 
     componentWillMount() {
@@ -1726,30 +1739,21 @@ class MainMap extends Component {
                     this.onEnd(event, gestureState, index);
                 }
             })
-        }
-
-        let animatedOpacity = [];
-        for (let i = 0; this.state.items.length > i; i++) {
-            animatedOpacity.push(new Animated.Value(1))
-
-        }
-
-        this.setState({
-            spContainerOpacity: animatedOpacity
-        });
+        };
     }
 
     componentDidMount() {
         // this.getLocationAsync();
         navigator.geolocation.getCurrentPosition((position) => {
             // alert("position: " + JSON.stringify(position));
-            this.setState({locationResult: {
-                latitude: position.coords.latitude,
-                longitude: position.coords.longitude,
-                latitudeDelta: 0.0922,
-                longitudeDelta: 0.0421
-            },
-                markers : [
+            this.setState({
+                locationResult: {
+                    latitude: position.coords.latitude,
+                    longitude: position.coords.longitude,
+                    latitudeDelta: 0.0922,
+                    longitudeDelta: 0.0421
+                },
+                markers: [
                     {
                         id: 0,
                         amount: 1,
@@ -1804,7 +1808,8 @@ class MainMap extends Component {
         const {dy} = g;
         const {locationY} = e.nativeEvent;
 
-        const {spContainerTranslateY, spContainerScaleX, layoutHeight, spContainerOpacity, spContainerImageWidth, spContainerImageHeight} = this.state;
+        const {spContainerTranslateY, spContainerScaleX, layoutHeight, spContainerOpacity, overlayOpacityAnim, overlayScaleAnim, spContainerImageWidth, spContainerImageHeight} = this.state;
+
         if (this.shoiuldGoToTop) {
             this.newPosition = dy;
         } else {
@@ -1824,18 +1829,7 @@ class MainMap extends Component {
         const present = (1 - (this.newPosition / layoutHeight));
 
 
-        let opacityArrayAnim = [];
-        spContainerOpacity.map((item, i) => {
-            opacityArrayAnim.push(Animated.timing(item, {
-                duration: 0,
-                toValue: index === i ? 1 : (1 - present),
-                useNativeDriver: true
-            }))
-
-        });
-
         Animated.parallel([
-            ...opacityArrayAnim,
             Animated.timing(spContainerTranslateY, {
                 duration: 0,
                 toValue: this.newPosition < 0 ? 0 : this.newPosition,
@@ -1853,14 +1847,26 @@ class MainMap extends Component {
             Animated.timing(spContainerImageHeight, {
                 duration: 0,
                 toValue: present > 1 ? 1 : present,
+            }),
+            Animated.timing(overlayOpacityAnim, {
+                duration: 0,
+                toValue: present > 1 ? 1 : present,
+                useNativeDriver: true
+            }),
+            Animated.timing(overlayScaleAnim, {
+                duration: 0,
+                toValue: present > 1 ? 0 : 1 - present,
+                useNativeDriver: true
             })
+
         ]).start();
 
     }
 
     onEnd(e, g, index) {
 
-        const {spContainerTranslateY, layoutHeight, spContainerScaleX, spContainerOpacity, spContainerImageWidth, spContainerImageHeight} = this.state;
+        const {spContainerTranslateY, layoutHeight, spContainerScaleX, spContainerOpacity, overlayOpacityAnim, overlayScaleAnim, spContainerImageWidth, spContainerImageHeight} = this.state;
+
         const duration = 200;
 
         if (this.shoiuldGoToTop) {
@@ -1871,17 +1877,8 @@ class MainMap extends Component {
 
         // console.log("this.shoiuldGoToTop", this.shoiuldGoToTop);
 
-        let opacityArrayAnim = [];
-        spContainerOpacity.map((item, i) => {
-            opacityArrayAnim.push(Animated.timing(item, {
-                duration,
-                toValue: 1,
-                useNativeDriver: true
-            }))
 
-        });
         Animated.parallel([
-            ...opacityArrayAnim,
             Animated.timing(spContainerTranslateY, {
                 duration,
                 toValue: this.shoiuldGoToTop ? 0 : (layoutHeight - FIRST_LEVEL_HEIGHT),
@@ -1900,20 +1897,32 @@ class MainMap extends Component {
             Animated.timing(spContainerImageHeight, {
                 duration: 0,
                 toValue: this.shoiuldGoToTop ? 1 : 0,
-            })]).start(() => {
+            }),
+            Animated.timing(overlayOpacityAnim, {
+                duration,
+                toValue: this.shoiuldGoToTop ? 1 : 0,
+                useNativeDriver: true
+            }),
+            Animated.timing(overlayScaleAnim, {
+                duration,
+                toValue: this.shoiuldGoToTop ? 0 : 1,
+                useNativeDriver: true
+            }),
+
+        ]).start(() => {
+            if (this.shoiuldGoToTop) {
+                this.setState({scrollEnabled: false});
+            } else {
+                this.setState({scrollEnabled: true});
+            }
         });
-        if (this.shoiuldGoToTop) {
-            this.setState({scrollEnabled: false});
-        } else {
-            this.setState({scrollEnabled: true});
-        }
     }
 
     _renderSp = () => {
 
-        const {spContainerOpacity} = this.state;
+            const {spContainerOpacity} = this.state;
         return Object.keys(this.state.items).map((item, index) => {
-            return (<Animated.View key={index} {...this._panResponder(index).panHandlers}
+                        return (<Animated.View key={index} {...this._panResponder(index).panHandlers}
                                    style={{
                                        transform: [
                                            {scale: this.spContainerScaleXValue},
@@ -1938,37 +1947,40 @@ class MainMap extends Component {
 
     _renderMarkers = () => {
 
-        return (this.state.markers.map((marker, i) => {
+            const {cardIndex, markers} = this.state;
+        return (markers.map((marker, i) => {
+            console.log("marker.id", cardIndex, marker.id);
+
             return (
-                <TouchableHighlight
-                    key={marker.id}
-                    onPress={() => {
-                        console.log("marker.id", marker.id);
-                        this.swiperRef.scrollBy((marker.id - this.state.cardIndex), true);
-                        this.setState({cardIndex: marker.id, locationResult: this.state.markers[marker.id].coordinate})
-                    }}>
-                    <MapView.Marker
+
+        <MapView.Marker style={{
+                    opacity: cardIndex === marker.id ? 1 : 0.7,
+                    transform: [
+                        {scale: cardIndex === marker.id ? 1.1 : 1},
+                    ],
+                }} key={marker.id}
                         coordinate={marker.coordinate}
-                    >
-                        <AnimatedMarker
-                            style={{
-                                opacity: this.state.cardIndex === marker.id ? 1 : 0.7,
-                                transform: [
-                                    {scale: this.state.cardIndex === marker.id ? 1.4 : 1},
-                                ],
-                            }}
-                            amount={marker.amount}
-                        />
-                    </MapView.Marker>
-                </TouchableHighlight>
+                        onPress={() => {
+                                    this.swiperRef.scrollBy((marker.id - cardIndex), true);
+                                    this.setState({
+                                        cardIndex: marker.id,
+                                        locationResult: markers[marker.id].coordinate
+                                    })
+                                }}
+        >
+            <AnimatedMarker
+
+                amount={marker.amount}
+            />
+        </MapView.Marker>
             );
         }))
 
     };
 
     render() {
-        return (
-            <View onLayout={(event) => {
+            return (
+        <View onLayout={(event) => {
                 const {x, y, width, height} = event.nativeEvent.layout;
 
                 if (this.state.layoutHeight === 0) {
@@ -1988,40 +2000,47 @@ class MainMap extends Component {
                     });
                 }
             }}
-                  style={{flex: 1}}>
-                <MapView
-                    style={{width, height}}
-                    region={this.state.locationResult}
-                >
-                    {this._renderMarkers()}
-                </MapView>
-                <Animated.View style={{
+              style={{flex: 1}}>
+            <MapView.Animated
+                style={{...StyleSheet.absoluteFillObject, transform: [{scale: this.overlayScaleValue}]}}
+                region={this.state.locationResult}
+            >
+                {this._renderMarkers()}
+            </MapView.Animated>
+
+            <Animated.View pointerEvents={"none"}
+                           style={[StyleSheet.absoluteFillObject, {
+                                   backgroundColor: 'black',
+                                   opacity: this.overlayOpacityValue
+                               }]}/>
+
+            <Animated.View style={{
                     elevation: 50,
-                    position: 'absolute', bottom: 0, left: 0, right: 0, top: 0,
+                    ...StyleSheet.absoluteFillObject,
                     transform: [
                         {translateY: this.state.spContainerTranslateY},
                     ]
                 }}>
-                    {this.state.visibleSwiper ? <Swiper
-                            ref={(ref) => {
+                {this.state.visibleSwiper ? <Swiper
+                        ref={(ref) => {
                             this.swiperRef = ref;
                         }}
-                            loop={false}
-                            scrollEnabled={this.state.scrollEnabled}
-                            showsPagination={false}
-                            showsButtons={false}
-                            onIndexChanged={(index) => {
+                        loop={false}
+                        scrollEnabled={this.state.scrollEnabled}
+                        showsPagination={false}
+                        showsButtons={false}
+                        onIndexChanged={(index) => {
                             if (this.state.markers[index]) {
-                             this.setState({cardIndex: index, locationResult: this.state.markers[index].coordinate});
+                                this.setState({cardIndex: index, locationResult: this.state.markers[index].coordinate});
                             }
                         }}
-                        >
-                            {this._renderSp()}
-                        </Swiper> : null}
-                </Animated.View>
-            </View>
-        );
+                    >
+                        {this._renderSp()}
+                    </Swiper> : null}
+            </Animated.View>
+        </View>
+            );
+        }
     }
-}
 
-export default MainMap
+    export default MainMap
