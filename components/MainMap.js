@@ -3,9 +3,7 @@ import {
     View,
     Dimensions,
     Text,
-    ScrollView,
     PanResponder,
-    TouchableHighlight,
     Animated,
     Image,
     Easing,
@@ -1806,7 +1804,6 @@ class MainMap extends Component {
     onMove(e, g, index) {
 
         const {dy} = g;
-        const {locationY} = e.nativeEvent;
 
         const {spContainerTranslateY, spContainerScaleX, layoutHeight, spContainerOpacity, overlayOpacityAnim, overlayScaleAnim, spContainerImageWidth, spContainerImageHeight} = this.state;
 
@@ -1815,16 +1812,6 @@ class MainMap extends Component {
         } else {
             this.newPosition = (layoutHeight - FIRST_LEVEL_HEIGHT) + dy;
         }
-
-
-        // if (this.shouldChangeScroll) {
-        //     this.scrollViewRef.scrollTo({
-        //         x: width * index,
-        //         y: 0,
-        //         animation: false
-        //     });
-        //     this.shouldChangeScroll = false;
-        // }
 
         const present = (1 - (this.newPosition / layoutHeight));
 
@@ -1874,9 +1861,6 @@ class MainMap extends Component {
         } else {
             this.shoiuldGoToTop = this.newPosition < (layoutHeight * 0.6);
         }
-
-        // console.log("this.shoiuldGoToTop", this.shoiuldGoToTop);
-
 
         Animated.parallel([
             Animated.timing(spContainerTranslateY, {
