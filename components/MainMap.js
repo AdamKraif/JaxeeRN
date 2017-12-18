@@ -32,6 +32,7 @@ class MainMap extends Component {
             spCardImageScale: new Animated.Value(0.1),
             overlayOpacityAnim: new Animated.Value(0),
             spSmallCardOpacityAnim: new Animated.Value(1),
+            spSmallCardOpacityAnim2: new Animated.Value(1),
             overlayScaleAnim: new Animated.Value(1),
             locationResult: {
                 latitude: 37.78825,
@@ -61,6 +62,10 @@ class MainMap extends Component {
         });
 
         this.spSmallCardOpacityAnim = this.state.spSmallCardOpacityAnim.interpolate({
+            inputRange: [0, 0.2, 0.2, 0.5, 0.8, 1],
+            outputRange: [0, 0.2, 0.2, 0.5, 0.8, 1]
+        });
+        this.spSmallCardOpacityAnim2 = this.state.spSmallCardOpacityAnim2.interpolate({
             inputRange: [0, 0.2, 0.2, 0.5, 0.8, 1],
             outputRange: [0, 0.2, 0.2, 0.5, 0.8, 1]
         });
@@ -130,6 +135,7 @@ class MainMap extends Component {
 
         const {dy} = g;
 
+        console.log(dy);
         const {
             spContainerTranslateY,
             spContainerScaleX,
@@ -137,6 +143,7 @@ class MainMap extends Component {
             overlayOpacityAnim,
             overlayScaleAnim,
             spSmallCardOpacityAnim,
+            spSmallCardOpacityAnim2,
             spCardImageScale
         } = this.state;
 
@@ -172,7 +179,12 @@ class MainMap extends Component {
             }),
             Animated.timing(spSmallCardOpacityAnim, {
                 duration: 50,
-                toValue: 0,
+                toValue: dy > 0 ? 1 : 0,
+                useNativeDriver: true
+            }),
+            Animated.timing(spSmallCardOpacityAnim2, {
+                duration: 50,
+                toValue: dy > 0 ? 1 : 0,
                 useNativeDriver: true
             }),
             Animated.timing(overlayScaleAnim, {
@@ -194,6 +206,7 @@ class MainMap extends Component {
             overlayOpacityAnim,
             overlayScaleAnim,
             spSmallCardOpacityAnim,
+            spSmallCardOpacityAnim2,
             spCardImageScale
         } = this.state;
 
@@ -225,6 +238,11 @@ class MainMap extends Component {
             Animated.timing(overlayOpacityAnim, {
                 duration,
                 toValue: this.shoiuldGoToTop ? 1 : 0,
+                useNativeDriver: true
+            }),
+            Animated.timing(spSmallCardOpacityAnim2, {
+                duration,
+                toValue: this.shoiuldGoToTop ? 0 : 1,
                 useNativeDriver: true
             }),
             Animated.timing(overlayScaleAnim, {
@@ -265,6 +283,7 @@ class MainMap extends Component {
 
                 <SpCard shoiuldGoToTop={this.shoiuldGoToTop}
                         spSmallCardOpacityAnim={this.spSmallCardOpacityAnim}
+                        spSmallCardOpacityAnim2={this.spSmallCardOpacityAnim2}
                         spCardImageScale={this.spCardImageScale}
                         spItem={items[spItem]}/>
 

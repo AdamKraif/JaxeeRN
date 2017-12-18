@@ -35,7 +35,7 @@ class SpCard extends Component {
 
 
     render() {
-        const {spItem, shoiuldGoToTop, spSmallCardOpacityAnim, spCardImageScale} = this.props;
+        const {spItem, shoiuldGoToTop, spSmallCardOpacityAnim, spSmallCardOpacityAnim2, spCardImageScale} = this.props;
         return <View style={{
             flex: 1,
             flexDirection: shoiuldGoToTop ? 'column' : 'row',
@@ -47,21 +47,21 @@ class SpCard extends Component {
                 style={[{
                     width: width,
                     height: height * 0.35,
-
                 }, styles.absolute]}
                 onLoadEnd={this.imageLoaded.bind(this)}
                 source={{uri: spItem.photoURL}}
             />
 
-                {shoiuldGoToTop ? null  : this.state.viewRef ? <BlurView
-                style={[styles.absolute, {
+                {this.state.viewRef ? <Animated.View style={[styles.absolute, {
                     width: width,
                     height: height * 0.35,
-                }]}
+                    opacity: spSmallCardOpacityAnim2
+                }]}><BlurView
+                style={{flex: 1}}
                 viewRef={this.state.viewRef}
                 blurType="dark"
-                blurAmount={10}
-            /> : null}
+                blurAmount={20}
+            /></Animated.View> : null}
             <Animated.View style={{
                 position: 'absolute', top: shoiuldGoToTop ? height * 0.36 : 0,
                 flex: 1,
@@ -74,7 +74,7 @@ class SpCard extends Component {
                 opacity: spSmallCardOpacityAnim
             }}>
                 {shoiuldGoToTop ? null : <Animated.Image
-                    style={{
+                        style={{
                     width: 44,
                     height: 44,
                     borderRadius: 22,
@@ -82,8 +82,8 @@ class SpCard extends Component {
                     borderWidth: 1,
                     marginRight: 15,
                 }}
-                    source={{uri: spItem.photoURL}}
-                />}
+                        source={{uri: spItem.photoURL}}
+                    />}
                 <View style={{flex: 1, flexDirection: 'column', marginRight: 15, backgroundColor: 'transparent'}}>
                     <Animated.Text style={{
                     color: shoiuldGoToTop ? '#333333' : 'white',
