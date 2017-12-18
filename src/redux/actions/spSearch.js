@@ -9,7 +9,7 @@ import firebase from 'react-native-firebase';
 
 export function consumerSearch () {
     return (dispatch, getState) => {
-        firebase.database().ref("test/users").orderByChild("jobs").limitToFirst(15).once("value", (data) => {
+        firebase.database().ref("test/users").orderByChild("jobs").limitToLast(15).once("value", (data) => {
             let serviceProviders = data.val();
             if (serviceProviders != null) {
                 dispatch({
