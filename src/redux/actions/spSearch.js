@@ -27,3 +27,25 @@ export function consumerSearch () {
         });
     }
 }
+
+
+export function jobsQuery () {
+    return (dispatch, getState) => {
+        firebase.database().ref("test/jobs").on("value", (data) => {
+            let jobs = data.val();
+            if (jobs != null) {
+                dispatch({
+                    type: types.HOME_SEARCH,
+                    payload: jobs,
+                });
+                return true;
+            } else {
+                dispatch({
+                    type: types.HOME_SEARCH,
+                    payload: jobs,
+                });
+                return false;
+            }
+        });
+    }
+}

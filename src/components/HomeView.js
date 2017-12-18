@@ -7,7 +7,10 @@ import {
     Image,
     ScrollView
 } from 'react-native';
-import firebase from 'react-native-firebase';
+
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux'
+import { ActionCreators } from '../redux/actions'
 
 class HomeView extends Component {
     constructor(props) {
@@ -20,26 +23,23 @@ class HomeView extends Component {
 
 
     componentWillMount() {
-        firebase.database().ref("test/orders").orderByChild("orderMadeBy").equalTo("adamkraifgmailcom").on("value", (data) => {
-            let orders = data.val();
-            if (orders != null) {
-                this.setState({orders: orders});
-            }
-        });
+        this.props.jobsQuery();
     }
 
     renderJobs = () => {
-        const {orders} = this.state;
-        return Object.keys(this.state.orders).map((key, i) => {
-            return <Text key={i}>{this.state.orders[key].jobType}</Text>
+        const {serviceProviders} = this.props;
+        if (!serviceProviders) return null;
+
+        return Object.keys(serviceProviders).map((key, i) => {
+            return <Text key={i}>{serviceProviders[key].jobName}</Text>
         })
     };
 
     render() {
-        const {orders} = this.state;
+        const {serviceProviders} = this.props;
         return (
             <View style={[{flex: 1}, {backgroundColor: '#ff4081'}]}>
-                {orders ? <ScrollView>{this.renderJobs()}</ScrollView> : null}
+                {serviceProviders ? <ScrollView>{this.renderJobs()}</ScrollView> : null}
             </View>
         )
     }
@@ -48,4 +48,14 @@ class HomeView extends Component {
 HomeView.propTypes = {};
 
 
-export default HomeView;
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators(ActionCreators, dispatch);
+}
+
+function mapStateToProps(state) {
+    return {
+        serviceProviders: state.firebaseQueries.jobs,
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(HomeView);

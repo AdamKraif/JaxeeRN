@@ -87,7 +87,7 @@ class SpCard extends Component {
                 <View style={{flex: 1, flexDirection: 'column', backgroundColor: 'transparent'}}>
                     <Animated.Text style={{
                     color: shoiuldGoToTop ? '#333333' : 'white',
-                    fontSize: 20,}}>
+                    fontSize: shoiuldGoToTop ? 18 : 19}}>
 
                         {spItem.name + " " + spItem.lastname}
                     </Animated.Text>
@@ -99,9 +99,9 @@ class SpCard extends Component {
                         {spItem.jobs ? spItem.jobs[0].jobName : ""}
                     </Animated.Text>
                 </View>
-                <View style={{position: 'absolute', right: 8, top: 8}}>
+                <View style={{position: 'absolute', right: 8, top: shoiuldGoToTop ? 0 : 8}}>
                     <StarRating
-                        starSize={shoiuldGoToTop ? 45 : 25}
+                        starSize={shoiuldGoToTop ? 40 : 25}
                         disabled={true}
                         maxStars={5}
                         rating={this.state.rating}

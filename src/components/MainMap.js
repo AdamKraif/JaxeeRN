@@ -391,7 +391,7 @@ function mapDispatchToProps(dispatch) {
 
 function mapStateToProps(state) {
     return {
-        serviceProviders: state.serviceProviders,
+        serviceProviders: state.firebaseQueries.serviceProviders,
     };
 }
 

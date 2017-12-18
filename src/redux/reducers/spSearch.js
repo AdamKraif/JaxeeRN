@@ -7,9 +7,22 @@
 import createReducer from '../helpers/createReducer'
 import * as types from '../actions/types'
 
-export const serviceProviders = createReducer({}, {
-  [types.CONSUMER_SEARCH](state, action) {
-    // alert("returnState" + JSON.stringify(action.payload));
-    return action.payload;
-  }
+const initialState = {
+    jobs: {},
+    serviceProviders: {}
+};
+
+export const firebaseQueries = createReducer(initialState, {
+    [types.CONSUMER_SEARCH](state, action) {
+        return {
+            ...state,
+            serviceProviders: action.payload
+        };
+    },
+    [types.HOME_SEARCH](state, action) {
+        return {
+            ...state,
+            jobs: action.payload
+        };
+    }
 });
