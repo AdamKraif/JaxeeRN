@@ -1,0 +1,102 @@
+{
+  "project_info": {
+    "project_number": "917760889827",
+    "firebase_url": "https://jaxee-276a7.firebaseio.com",
+    "project_id": "jaxee-276a7",
+    "storage_bucket": "jaxee-276a7.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917760889827:android:be2dbdf8194587d8",
+        "android_client_info": {
+          "package_name": "com.jaxee.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917760889827-hem6mpgf3o61ddi5oeelskc728uasll9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jaxee.android",
+            "certificate_hash": "c58dba9386d204a8d99a6717cd43e6f25e55fd8d"
+          }
+        },
+        {
+          "client_id": "917760889827-s3134jd72bho8qogpbhfpscp6rphqnf2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jaxee.android",
+            "certificate_hash": "02753b3df085154ff3a6fb980e6d49f2b7523a68"
+          }
+        },
+        {
+          "client_id": "917760889827-v0b4q1psv6bi9fm4n5of3323jr4n2826.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqIog5yHcxMBovgW0rK21XYq3xj9ukxgA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "917760889827-v0b4q1psv6bi9fm4n5of3323jr4n2826.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "917760889827-cosffpgetveu619hgv6qo7g90ojq8360.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.jaxee.ios",
+                "app_store_id": "1254967729"
+              }
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917760889827:android:4813969d51407b7b",
+        "android_client_info": {
+          "package_name": "com.jaxee"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917760889827-v0b4q1psv6bi9fm4n5of3323jr4n2826.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqIog5yHcxMBovgW0rK21XYq3xj9ukxgA"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
