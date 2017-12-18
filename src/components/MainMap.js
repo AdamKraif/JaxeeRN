@@ -370,7 +370,9 @@ class MainMap extends Component {
                             showsButtons={false}
                             index={this.state.cardIndex}
                             onIndexChanged={(index) => {
-                                if (serviceProviders[Object.keys(serviceProviders)[index]].location) {
+                                if (index === -1) return;
+
+                                if (serviceProviders[Object.keys(serviceProviders)[index]] && serviceProviders[Object.keys(serviceProviders)[index]].location) {
                                     this.setState({cardIndex: index, locationResult: serviceProviders[Object.keys(serviceProviders)[index]].location[0] });
                                 } else {
                                      this.setState({cardIndex: index});

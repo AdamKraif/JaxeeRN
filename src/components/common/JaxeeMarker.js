@@ -37,9 +37,7 @@ class JaxeeMarker extends Component {
                     style={{
                         width: 40,
                         height: 40,
-                        borderRadius: 20,
-                        borderColor: '#5e5587',
-                         borderWidth: 1,
+                        borderRadius: 20
                     }}
                     source={{ uri: marker.photoURL && marker.photoURL != '' ? marker.photoURL : (marker.picture_large && marker.picture_large != '' ? marker.picture_large : (marker.picture && marker.picture != '' ? marker.picture : 'https://firebasestorage.googleapis.com/v0/b/jaxee-276a7.appspot.com/o/Jaxee%2FApp%20Store%20Images%20-%20FinalArtboard%201%20copy.jpg?alt=media&token=0f024375-c092-44e8-a265-fbd558977954'))}}
                 />
