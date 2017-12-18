@@ -61,8 +61,8 @@ class MainMap extends Component {
         });
 
         this.spSmallCardOpacityAnim = this.state.spSmallCardOpacityAnim.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0, 1]
+            inputRange: [0, 0.2, 0.2, 0.5, 0.8, 1],
+            outputRange: [0, 0.2, 0.2, 0.5, 0.8, 1]
         });
 
         this.overlayScaleValue = this.state.overlayScaleAnim.interpolate({
@@ -171,7 +171,7 @@ class MainMap extends Component {
                 useNativeDriver: true
             }),
             Animated.timing(spSmallCardOpacityAnim, {
-                duration: 10,
+                duration: 50,
                 toValue: 0,
                 useNativeDriver: true
             }),
