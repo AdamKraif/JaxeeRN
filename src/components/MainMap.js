@@ -130,7 +130,7 @@ class MainMap extends Component {
             this.setState({
                 visibleSwiper: true
             });
-        }, 100);
+        }, 300);
     }
 
 
@@ -298,7 +298,6 @@ class MainMap extends Component {
     };
 
     _renderMarkers = () => {
-
         const {cardIndex} = this.state;
         const {serviceProviders} = this.props;
         return ( Object.keys(serviceProviders).map((marker, i) => {
@@ -315,7 +314,6 @@ class MainMap extends Component {
                 );
             }
         }))
-
     };
 
     render() {
@@ -344,7 +342,7 @@ class MainMap extends Component {
                   style={{flex: 1}}>
                 <MapView.Animated
                     style={{...StyleSheet.absoluteFillObject, transform: [{scale: this.overlayScaleValue}]}}
-                    region={this.state.locationResult}
+                    region={{...this.state.locationResult, latitudeDelta: 0.0922, longitudeDelta: 0.0421}}
                     customMapStyle={styling.styles}
                 >
                     {this._renderMarkers()}
@@ -370,8 +368,13 @@ class MainMap extends Component {
                             scrollEnabled={this.state.scrollEnabled}
                             showsPagination={false}
                             showsButtons={false}
+                            index={this.state.cardIndex}
                             onIndexChanged={(index) => {
-                                this.setState({cardIndex: index, locationResult: serviceProviders[Object.keys(serviceProviders)[index]].location ? serviceProviders[Object.keys(serviceProviders)[index]].location[0] : null});
+                                if (serviceProviders[Object.keys(serviceProviders)[index]].location) {
+                                    this.setState({cardIndex: index, locationResult: serviceProviders[Object.keys(serviceProviders)[index]].location[0] });
+                                } else {
+                                     this.setState({cardIndex: index});
+                                }
                             }}
                         >
                             {this._renderSp()}
