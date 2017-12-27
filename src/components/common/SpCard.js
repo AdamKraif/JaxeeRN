@@ -1,15 +1,11 @@
 import React, {Component} from 'react';
-import PropTypes from 'prop-types';
 import {
     View,
-    Text,
     Animated,
     Dimensions,
-    ScrollView,
     StyleSheet,
-    findNodeHandle,
+    findNodeHandle, Image,
 } from 'react-native';
-import { BlurView } from 'react-native-blur';
 import StarRating from 'react-native-star-rating';
 
 
@@ -29,26 +25,19 @@ class SpCard extends Component {
 
     }
 
-    imageLoaded() {
-        this.setState({ viewRef: findNodeHandle(this.backgroundImage) });
-    }
-
-
     render() {
-        const {spItem, shoiuldGoToTop, spSmallCardOpacityAnim, spSmallCardOpacityAnim2, spCardImageScale} = this.props;
+        const {spItem, shoiuldGoToTop, spSmallCardOpacityAnim, spSmallCardOpacityAnim2} = this.props;
         return <View style={{
             flex: 1,
             flexDirection: shoiuldGoToTop ? 'column' : 'row',
 
             backgroundColor: 'white',
         }}>
-            <Animated.Image
-                ref={(img) => { this.backgroundImage = img; }}
+            <Image
                 style={[{
                     width: width,
                     height: height * 0.35,
                 }, styles.absolute]}
-                onLoadEnd={this.imageLoaded.bind(this)}
                 source={{uri: spItem.photoURL && spItem.photoURL != '' ? spItem.photoURL : (spItem.picture_large && spItem.picture_large != '' ? spItem.picture_large : (spItem.picture && spItem.picture != '' ? spItem.picture : 'https://firebasestorage.googleapis.com/v0/b/jaxee-276a7.appspot.com/o/Jaxee%2FApp%20Store%20Images%20-%20FinalArtboard%201%20copy.jpg?alt=media&token=0f024375-c092-44e8-a265-fbd558977954'))}}
             />
 
@@ -56,12 +45,7 @@ class SpCard extends Component {
                     width: width,
                     height: height * 0.35,
                     opacity: spSmallCardOpacityAnim2
-                }]}><BlurView
-                    style={{flex: 1}}
-                    viewRef={this.state.viewRef}
-                    blurType="dark"
-                    blurAmount={20}
-                /></Animated.View> : null}
+                }]}/> : null}
             <Animated.View style={{
                 position: 'absolute', right:0, left: 0, top: shoiuldGoToTop ? height * 0.36 : 0,
                 flex: 1,

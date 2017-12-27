@@ -11,7 +11,6 @@
     "prop-types": "^15.6.0",
     "react": "16.0.0",
     "react-native": "0.51.0",
-    "react-native-blur": "^3.2.2",
     "react-native-firebase": "^3.2.0",
     "react-native-fontawesome": "^5.7.0",
     "react-native-maps": "^0.18.3",
