@@ -7,6 +7,7 @@ import {
     findNodeHandle, Image,
 } from 'react-native';
 import StarRating from 'react-native-star-rating';
+import {getConfig} from "../utilities/utilities";
 
 
 const {height, width} = Dimensions.get('window');
@@ -63,7 +64,7 @@ class SpCard extends Component {
                     height: 44,
                     marginRight: 10,
                     borderRadius: 22,
-                    borderColor: '#5e5587',
+                    borderColor: getConfig().mainColor,
                     borderWidth: 1,
                 }}
                         source={{uri: spItem.photoURL && spItem.photoURL != '' ? spItem.photoURL : (spItem.picture_large && spItem.picture_large != '' ? spItem.picture_large : (spItem.picture && spItem.picture != '' ? spItem.picture : 'https://firebasestorage.googleapis.com/v0/b/jaxee-276a7.appspot.com/o/Jaxee%2FApp%20Store%20Images%20-%20FinalArtboard%201%20copy.jpg?alt=media&token=0f024375-c092-44e8-a265-fbd558977954'))}}
@@ -89,7 +90,7 @@ class SpCard extends Component {
                         disabled={true}
                         maxStars={5}
                         rating={this.state.rating}
-                        starColor={shoiuldGoToTop ? '#5e5587' : 'white'}
+                        starColor={shoiuldGoToTop ? getConfig().mainColor : 'white'}
                     />
                 </View>
             </Animated.View>

@@ -7,6 +7,7 @@ import {
     Image
 } from 'react-native';
 import MapView from 'react-native-maps';
+import {getConfig} from "../utilities/utilities";
 
 
 class JaxeeMarker extends Component {
@@ -22,7 +23,7 @@ class JaxeeMarker extends Component {
                         borderWidth: 1,
                         alignItems: 'center',
                         justifyContent: 'center',
-                        borderColor: '#5e5587',
+                        borderColor: getConfig().mainColor,
                             transform: [
                                 {scale: cardIndex === id ? 1.1 : 1},
                             ],

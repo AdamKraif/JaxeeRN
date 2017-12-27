@@ -287,7 +287,8 @@ class MainMap extends Component {
                                        height: this.state.layoutHeight,
                                    }}>
 
-                <SpCard shoiuldGoToTop={this.shoiuldGoToTop}
+                <SpCard
+                    shoiuldGoToTop={this.shoiuldGoToTop}
                         spSmallCardOpacityAnim={this.spSmallCardOpacityAnim}
                         spSmallCardOpacityAnim2={this.spSmallCardOpacityAnim2}
                         spCardImageScale={this.spCardImageScale}
